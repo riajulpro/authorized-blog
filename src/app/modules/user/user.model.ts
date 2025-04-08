@@ -1,4 +1,6 @@
+import bcrypt from "bcrypt";
 import { model, Model, Schema } from "mongoose";
+
 import { UserType } from "./user.interface";
 
 const UserSchema: Schema<UserType> = new Schema(
@@ -33,5 +35,14 @@ const UserSchema: Schema<UserType> = new Schema(
     timestamps: true,
   }
 );
+
+UserSchema.pre("save", async function (next) {
+  const user = this;
+  const saltedRounds = 10;
+
+  user.password = await bcrypt.hash(user.password, saltedRounds);
+
+  next();
+});
 
 export const UserModel: Model<UserType> = model<UserType>("User", UserSchema);
